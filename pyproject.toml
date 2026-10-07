@@ -54,6 +54,9 @@ ignore = ["B008", "SIM108", "SIM102"]
 testpaths = ["tests"]
 addopts = "-q"
 filterwarnings = ["ignore::DeprecationWarning"]
+markers = [
+    "integration: 需要真实靶站运行的集成测试",
+]
 
 [tool.coverage.run]
 source = ["app", "demo_target"]

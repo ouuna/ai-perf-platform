@@ -24,7 +24,15 @@ class GeneratedUser(HttpUser):
 
     {% for iface in login_interfaces %}
     def login_{{ iface.name }}(self):
-        resp = self.client.post("{{ iface.path }}", json={{ iface.params | tojson }})
+        {% if iface.params %}
+        resp = self.client.post(
+            "{{ iface.path }}",
+            json={{ iface.params | tojson }},
+            catch_response=True,
+        )
+        {% else %}
+        resp = self.client.post("{{ iface.path }}", catch_response=True)
+        {% endif %}
         if resp.status_code != {{ iface.assert_status }}:
             resp.failure(f"login status {resp.status_code}")
         else:
@@ -41,14 +49,22 @@ class GeneratedUser(HttpUser):
             self.login_{{ iface.depends_on }}()
         headers = {"Authorization": f"Bearer {self.token}"}
         {% endif %}
+        {% if iface.params %}
         resp = self.client.request(
             "{{ iface.method }}",
             "{{ iface.path }}",
             headers=headers,
             json={{ iface.params | tojson }},
             name="{{ iface.name }}",
-            catch_response=True,
         )
+        {% else %}
+        resp = self.client.request(
+            "{{ iface.method }}",
+            "{{ iface.path }}",
+            headers=headers,
+            name="{{ iface.name }}",
+        )
+        {% endif %}
         {% if iface.assert_status %}
         if resp.status_code != {{ iface.assert_status }}:
             resp.failure(f"{{ iface.name }} status {resp.status_code}")
