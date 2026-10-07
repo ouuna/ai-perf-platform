@@ -53,7 +53,10 @@ def _valid_plan_json() -> str:
 @pytest.mark.integration
 def test_full_pipeline_mock(tmp_path: Path) -> None:
     """需求 → 方案 → 脚本 → 压测 → 采集 → 入库（短时低并发）。"""
-    _wait_target()
+    try:
+        _wait_target()
+    except RuntimeError:
+        pytest.skip("靶站未启动，跳过集成测试（CI 的 integration job 会启动靶站）")
 
     mock = MockLLM(responses=[_valid_plan_json()])
     plan = Planner(mock).generate("对登录和商品列表做短时低并发压测")

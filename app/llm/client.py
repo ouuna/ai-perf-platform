@@ -128,7 +128,7 @@ class AnthropicClient(LLMClient):
 class MockLLM(LLMClient):
     """确定性 mock：无网络无 Key，返回可配置的响应序列。
 
-    - `responses`: 按顺序返回的文本；耗尽后返回最后一个（或默认）。
+    - `responses`: 按顺序返回的文本；耗尽后返回 `default_response`。
     - 用于测试与 demo，保证全链路可离线复现。
     """
 
@@ -151,14 +151,18 @@ class MockLLM(LLMClient):
 
 
 def create_llm_client(provider: str | None = None) -> LLMClient:
-    """根据配置创建 LLM 客户端。provider 优先级：参数 > 环境变量 > mock。"""
+    """根据配置创建 LLM 客户端。provider 优先级：参数 > 环境变量 > mock。
+
+    无 Key 时使用 mock，且 mock 默认返回一个合法的示例 TestPlan，
+    保证 demo 和 API 在无 Key 情况下也能完整跑通全链路。
+    """
     from app.config import get_settings
 
     settings = get_settings()
     provider = (provider or settings.llm_provider).strip().lower()
 
     if provider == "mock":
-        return MockLLM()
+        return MockLLM(default_response=_DEMO_PLAN_JSON)
     if provider == "anthropic":
         return AnthropicClient(settings.anthropic_api_key, settings.llm_model)
     if provider in {"openai", "openai-compatible"}:
@@ -166,3 +170,19 @@ def create_llm_client(provider: str | None = None) -> LLMClient:
             settings.openai_api_key, settings.llm_model, settings.openai_base_url
         )
     raise LLMError(f"未知的 LLM provider: {provider}")
+
+
+# 内置示例方案：MockLLM 在无 Key 场景下的默认返回，保证 demo 可跑通
+_DEMO_PLAN_JSON = (
+    '{"test_type":"load","target_interfaces":['
+    '{"name":"login","method":"POST","path":"/login",'
+    '"params":{"username":"demo"},"weight":1,"depends_on":null,"assert_status":200},'
+    '{"name":"list_products","method":"GET","path":"/products",'
+    '"params":{},"weight":3,"depends_on":"login","assert_status":200},'
+    '{"name":"product_detail","method":"GET","path":"/products/1",'
+    '"params":{},"weight":2,"depends_on":"login","assert_status":200}],'
+    '"load_model":{"start_users":1,"step_users":2,"step_duration_seconds":3,'
+    '"max_users":5,"spawn_rate":1,"think_time_seconds":0.1},'
+    '"sla":{"p95_ms":1000,"p99_ms":2000,"max_error_rate":0.05,"min_rps":null},'
+    '"preconditions":[],"notes":"mock 示例方案"}'
+)

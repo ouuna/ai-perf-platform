@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 智能性能测试平台</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --border: #e2e4e8;
+    --primary: #378ADD; --primary-dark: #185FA5;
+    --text: #1a1d21; --muted: #6b7280;
+    --pass: #0F6E56; --fail: #A32D2D;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  .container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+          padding: 20px; margin-bottom: 20px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+  textarea { width: 100%; min-height: 80px; padding: 12px; border: 1px solid var(--border);
+             border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; }
+  input[type=text] { width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+                     border-radius: 8px; font-size: 14px; }
+  button { background: var(--primary); color: #fff; border: none; padding: 10px 20px;
+           border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 8px; }
+  button:hover { background: var(--primary-dark); }
+  button:disabled { background: #b0c4d8; cursor: not-allowed; }
+  .status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px;
+            font-weight: 600; }
+  .status-created, .status-planning { background: #E6F1FB; color: #185FA5; }
+  .status-planned { background: #E1F5EE; color: #0F6E56; }
+  .status-running { background: #FAEEDA; color: #854F0B; }
+  .status-completed { background: #EAF3DE; color: #3B6D11; }
+  .status-failed { background: #FCEBEB; color: #A32D2D; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+  th { background: #f0f4f8; }
+  pre { background: #f8f9fa; padding: 12px; border-radius: 8px; overflow-x: auto;
+        font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .report-frame { width: 100%; height: 600px; border: 1px solid var(--border); border-radius: 8px; }
+  .hint { background: #FAEEDA; border-left: 3px solid #BA7517; padding: 10px 14px;
+          border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI 智能性能测试平台</h1>
+  <p>自然语言需求 → 测试方案 → Locust 压测 → 指标分析 → 性能报告</p>
+</header>
+
+<div class="container">
+  <div class="hint">
+    ⚠️ 仅对你有授权的系统进行压测。本平台默认只允许 localhost，且对并发/时长有硬上限。
+  </div>
+
+  <div class="card">
+    <h2>1. 提交测试需求</h2>
+    <textarea id="requirement" placeholder="例如：对登录和商品列表接口做负载测试，目标 20 并发，P95 < 500ms，先阶梯加压再稳定 3 分钟">对登录、商品列表、商品详情接口做负载测试，最大 5 并发，P95 < 1000ms，错误率 < 5%</textarea>
+    <div style="margin-top:8px">
+      <label class="muted">目标地址</label>
+      <input type="text" id="targetUrl" value="http://127.0.0.1:8001">
+    </div>
+    <button id="btnCreate" onclick="createTask()">生成测试方案</button>
+  </div>
+
+  <div class="card">
+    <h2>2. 测试方案（可查看后手动触发压测）</h2>
+    <div id="planArea"><span class="muted">尚未生成方案</span></div>
+    <button id="btnRun" onclick="runTask()" disabled>触发压测</button>
+  </div>
+
+  <div class="card">
+    <h2>3. 任务状态</h2>
+    <div id="taskStatus"><span class="muted">暂无任务</span></div>
+  </div>
+
+  <div class="card">
+    <h2>4. 性能报告</h2>
+    <div id="reportArea"><span class="muted">压测完成后可查看报告</span></div>
+  </div>
+</div>
+
+<script>
+let currentTaskId = null;
+let pollTimer = null;
+
+async function createTask() {
+  const requirement = document.getElementById('requirement').value.trim();
+  const targetUrl = document.getElementById('targetUrl').value.trim();
+  if (!requirement) { alert('请输入测试需求'); return; }
+  document.getElementById('btnCreate').disabled = true;
+  document.getElementById('taskStatus').innerHTML = '<span class="muted">正在生成方案...</span>';
+  try {
+    const resp = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requirement, target_url: targetUrl })
+    });
+    const data = await resp.json();
+    currentTaskId = data.task_id;
+    document.getElementById('taskStatus').innerHTML =
+      `任务 #${currentTaskId} <span class="status status-planning">规划中</span>`;
+    pollTask();
+  } catch (e) {
+    document.getElementById('taskStatus').innerHTML = `<span class="status status-failed">请求失败: ${e}</span>`;
+  }
+  document.getElementById('btnCreate').disabled = false;
+}
+
+async function runTask() {
+  if (!currentTaskId) { alert('请先生成方案'); return; }
+  document.getElementById('btnRun').disabled = true;
+  try {
+    await fetch(`/api/tasks/${currentTaskId}/run`, { method: 'POST' });
+    document.getElementById('taskStatus').innerHTML =
+      `任务 #${currentTaskId} <span class="status status-running">压测中</span>`;
+    pollTask();
+  } catch (e) {
+    alert('触发压测失败: ' + e);
+  }
+}
+
+async function pollTask() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    if (!currentTaskId) return;
+    try {
+      const resp = await fetch(`/api/tasks/${currentTaskId}`);
+      const task = await resp.json();
+      const statusMap = {
+        'created': '已创建', 'planning': '规划中', 'planned': '方案已就绪',
+        'running': '压测中', 'completed': '已完成', 'failed': '失败'
+      };
+      const label = statusMap[task.status] || task.status;
+      let html = `任务 #${task.id} <span class="status status-${task.status}">${label}</span>`;
+      if (task.plan) {
+        document.getElementById('planArea').innerHTML =
+          `<pre>${JSON.stringify(task.plan, null, 2)}</pre>`;
+        document.getElementById('btnRun').disabled = (task.status === 'running');
+      }
+      if (task.status === 'planned') {
+        document.getElementById('btnRun').disabled = false;
+      }
+      if (task.status === 'failed') {
+        html += `<div class="muted" style="margin-top:8px">${task.requirement}</div>`;
+      }
+      document.getElementById('taskStatus').innerHTML = html;
+
+      if (task.status === 'completed') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        await loadReport();
+      } else if (task.status === 'failed') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    } catch (e) { /* 轮询中忽略网络抖动 */ }
+  }, 1500);
+}
+
+async function loadReport() {
+  try {
+    const resp = await fetch(`/api/tasks/${currentTaskId}/report?fmt=html`);
+    const data = await resp.json();
+    const blob = new Blob([data.content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    document.getElementById('reportArea').innerHTML =
+      `<iframe class="report-frame" src="${url}"></iframe>`;
+  } catch (e) {
+    document.getElementById('reportArea').innerHTML = `<span class="muted">报告加载失败: ${e}</span>`;
+  }
+}
+</script>
+</body>
+</html>
