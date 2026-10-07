@@ -11,10 +11,14 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import psutil
 
 from app.db import get_db
+
+if TYPE_CHECKING:
+    from app.db import Database
 
 
 @dataclass
@@ -155,11 +159,12 @@ def collect_from_run(
     return points
 
 
-def save_points(points: list[MetricPoint]) -> None:
-    """把时间序列点写入 SQLite。"""
+def save_points(points: list[MetricPoint], db: Database | None = None) -> None:
+    """把时间序列点写入 SQLite。可传入自定义 db 实例，否则用全局单例。"""
     if not points:
         return
-    get_db().insert_metric_points([p.to_dict() for p in points])
+    target = db if db is not None else get_db()
+    target.insert_metric_points([p.to_dict() for p in points])
 
 
 def _safe_float(value: str | None) -> float | None:

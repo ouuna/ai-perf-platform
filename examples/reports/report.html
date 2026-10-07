@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>性能测试报告</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+         max-width: 900px; margin: 0 auto; padding: 24px; color: #222; line-height: 1.6; }
+  h1 { border-bottom: 2px solid #378ADD; padding-bottom: 8px; }
+  h2 { color: #185FA5; margin-top: 28px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; font-size: 14px; }
+  th { background: #E6F1FB; }
+  .pass { color: #0F6E56; font-weight: bold; }
+  .fail { color: #A32D2D; font-weight: bold; }
+  .fact { background: #F1EFE8; padding: 6px 10px; margin: 4px 0; border-radius: 4px; font-size: 13px; }
+  .hypothesis { border-left: 3px solid #BA7517; padding: 8px 12px; margin: 8px 0; background: #FAEEDA; }
+  .conf-high { color: #A32D2D; }
+  .conf-medium { color: #BA7517; }
+  .conf-low { color: #888780; }
+  .chart { margin: 16px 0; }
+</style>
+</head>
+<body>
+<h1>性能测试报告</h1>
+
+<h2>1. 测试目的与范围</h2>
+<p>对登录、商品列表、商品详情做短时低并发压测（demo）</p>
+
+<h2>2. 环境与压测模型</h2>
+<ul>
+  <li>测试类型：load</li>
+  <li>压测模型：起始 1 用户，
+      步长 2，每阶梯 3s，
+      最大 5 用户，spawn rate 1.0</li>
+  <li>接口数：3</li>
+</ul>
+
+<h2>3. SLA 与结论摘要</h2>
+<table>
+  <tr><th>接口</th><th>SLA 判定</th></tr>
+  <tr><td>Aggregated</td>
+      <td class="pass">通过</td></tr>
+  <tr><td>list_products</td>
+      <td class="pass">通过</td></tr>
+  <tr><td>product_detail</td>
+      <td class="pass">通过</td></tr>
+</table>
+
+<h2>4. 接口指标表</h2>
+<table>
+  <tr><th>接口</th><th>RPS</th><th>P50 (ms)</th><th>P95 (ms)</th><th>P99 (ms)</th><th>错误率</th></tr>
+  <tr>
+    <td>整体</td>
+    <td>2.29</td>
+    <td>1.6</td>
+    <td>2.7</td>
+    <td>2.9</td>
+    <td>0.00%</td>
+  </tr>
+  <tr>
+    <td>list_products</td>
+    <td>1.17</td>
+    <td>2.0</td>
+    <td>2.9</td>
+    <td>3.0</td>
+    <td>0.00%</td>
+  </tr>
+  <tr>
+    <td>product_detail</td>
+    <td>1.37</td>
+    <td>1.8</td>
+    <td>2.4</td>
+    <td>2.6</td>
+    <td>0.00%</td>
+  </tr>
+</table>
+
+<h2>5. 趋势图</h2>
+<div class="chart"><svg viewBox="0 0 640 240" xmlns="http://www.w3.org/2000/svg"><text x="320.0" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">吞吐与 P95 延迟趋势</text><line x1="50" y1="20" x2="50" y2="200" stroke="#999"/><line x1="50" y1="200" x2="620" y2="200" stroke="#999"/><text x="42" y="20.0" text-anchor="end" font-size="10" fill="#666">5.0</text><text x="42" y="200.0" text-anchor="end" font-size="10" fill="#666">0.0</text><text x="50.0" y="216" text-anchor="middle" font-size="10" fill="#666">1791371227</text><text x="620.0" y="216" text-anchor="middle" font-size="10" fill="#666">1791371236</text><path d="M 50.0 200.0 L 113.3 200.0 L 176.7 200.0 L 240.0 128.0 L 303.3 110.0 L 366.7 104.0 L 430.0 92.0 L 493.3 70.4 L 556.7 50.0 L 620.0 20.0" fill="none" stroke="#378ADD" stroke-width="2"/><text x="610" y="16" text-anchor="end" font-size="10" fill="#378ADD">RPS</text><path d="M 50.0 200.0 L 113.3 200.0 L 176.7 128.0 L 240.0 92.0 L 303.3 92.0 L 366.7 92.0 L 430.0 56.0 L 493.3 56.0 L 556.7 56.0 L 620.0 56.0" fill="none" stroke="#D85A30" stroke-width="2"/><text x="610" y="30" text-anchor="end" font-size="10" fill="#D85A30">P95 (ms)</text></svg></div>
+
+<h2>6. 拐点与容量结论</h2>
+<p>最大稳定并发：<strong>5</strong> 用户；
+   估算容量：<strong>5.0</strong> RPS。</p>
+
+<h2>7. 瓶颈分析（证据 + 假设 + 置信度）</h2>
+  <div class="hypothesis">
+    <strong>假设：</strong>吞吐在并发上升后趋于平稳，符合阶梯加压下的典型容量曲线<br>
+    <span class="conf-medium">置信度：medium</span>
+  </div>
+  <h3>排查建议</h3>
+  <ul><li>观察更高并发下的延迟与错误率变化</li></ul>
+  <h3>优化建议</h3>
+  <ul><li>针对高延迟接口做性能剖析</li></ul>
+
+<h2>8. 事实清单（规则层）</h2>
+<div class="fact"><strong>[F1]</strong> (knee) 检测到吞吐拐点：并发超过该点后吞吐不再增长、延迟上升
+ <span style="color:#666">{'max_stable_users': 5.0, 'capacity_rps': 5.0}</span></div>
+<div class="fact"><strong>[F2]</strong> (sla) 接口 'Aggregated' SLA 判定：通过
+ <span style="color:#666">{'pass': 1.0}</span></div>
+<div class="fact"><strong>[F3]</strong> (sla) 接口 'list_products' SLA 判定：通过
+ <span style="color:#666">{'pass': 1.0}</span></div>
+<div class="fact"><strong>[F4]</strong> (sla) 接口 'product_detail' SLA 判定：通过
+ <span style="color:#666">{'pass': 1.0}</span></div>
+<div class="fact"><strong>[F5]</strong> (anomaly) 吞吐出现明显锯齿波动，可能存在锁竞争或间歇性阻塞
+ <span style="color:#666">{'mean_rps': 2.2933334000000003, 'std_rps': 1.7055335218699867}</span></div>
+
+<h2>9. 风险与局限</h2>
+<ul>
+  <li>压测机自监控：采样 22 次，CPU 峰值 3.1%，内存峰值 46.4MB</li>
+  <li>数据量、网络环境与生产环境可能存在差异，结论需结合实际评估。</li>
+</ul>
+
+<h2>10. 附录</h2>
+<p>完整原始数据与脚本见任务产出的 CSV 与 locustfile。</p>
+
+</body>
+</html>

@@ -50,6 +50,11 @@ extend-exclude = ["locustfile_generated", ".venv", "build", "dist"]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
 ignore = ["B008", "SIM108", "SIM102"]
 
+[tool.ruff.lint.per-file-ignores]
+# reporter 模板字符串（HTML/CSS/Markdown 生成内容）不受行长度约束
+"app/reporter/reporter.py" = ["E501"]
+"app/llm/prompts.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
