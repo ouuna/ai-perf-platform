@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# 测试与覆盖率
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# 工具
+.mypy_cache/
+.ruff_cache/
+*.swp
+
+# 数据与运行时产物
+data/
+locustfile_generated/
+*.db
+*.sqlite3
+*.csv
+*.log
+
+# 环境
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.iml
