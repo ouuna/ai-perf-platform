@@ -58,9 +58,7 @@ class TestPlan(BaseModel):
         names = {i.name for i in self.target_interfaces}
         for iface in self.target_interfaces:
             if iface.depends_on is not None and iface.depends_on not in names:
-                raise ValueError(
-                    f"接口 '{iface.name}' 的 depends_on '{iface.depends_on}' 不存在"
-                )
+                raise ValueError(f"接口 '{iface.name}' 的 depends_on '{iface.depends_on}' 不存在")
             if iface.depends_on == iface.name:
                 raise ValueError(f"接口 '{iface.name}' 不能依赖自身")
         return self

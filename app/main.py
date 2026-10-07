@@ -20,6 +20,12 @@ app.add_middleware(
 app.include_router(router)
 
 
+@app.get("/health")
+def root_health() -> dict[str, str]:
+    """根级健康检查（供 Docker/CI 探测）。"""
+    return {"status": "ok"}
+
+
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     """返回单页前端。"""

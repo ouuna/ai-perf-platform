@@ -16,8 +16,12 @@ def _plan() -> TestPlan:
                 {"name": "list_products", "method": "GET", "path": "/products", "weight": 1}
             ],
             "load_model": {
-                "start_users": 1, "step_users": 10, "step_duration_seconds": 60,
-                "max_users": 100, "spawn_rate": 5, "think_time_seconds": 1.0,
+                "start_users": 1,
+                "step_users": 10,
+                "step_duration_seconds": 60,
+                "max_users": 100,
+                "spawn_rate": 5,
+                "think_time_seconds": 1.0,
             },
             "sla": {"p95_ms": 500, "max_error_rate": 0.01},
         }
@@ -30,8 +34,12 @@ def _result() -> AnalysisResult:
     r.estimated_capacity_rps = 480.5
     r.sla_pass = {"list_products": True, "Aggregated": True}
     r.facts = [
-        Fact(id="F1", kind="knee", statement="吞吐拐点",
-             values={"max_stable_users": 50.0, "capacity_rps": 480.5}),
+        Fact(
+            id="F1",
+            kind="knee",
+            statement="吞吐拐点",
+            values={"max_stable_users": 50.0, "capacity_rps": 480.5},
+        ),
         Fact(id="F2", kind="sla", statement="SLA 通过", values={"pass": 1.0}),
     ]
     return r
@@ -41,8 +49,11 @@ def _ai() -> AIAnalysis:
     return AIAnalysis.model_validate(
         {
             "hypotheses": [
-                {"statement": "CPU 饱和导致吞吐封顶在 480 RPS",
-                 "confidence": "high", "evidence_refs": ["F1"]}
+                {
+                    "statement": "CPU 饱和导致吞吐封顶在 480 RPS",
+                    "confidence": "high",
+                    "evidence_refs": ["F1"],
+                }
             ],
             "investigation_suggestions": ["检查 CPU 密集逻辑"],
             "optimization_suggestions": ["优化计算"],
@@ -58,8 +69,14 @@ def _ctx() -> ReportContext:
         result=_result(),
         ai=_ai(),
         metric_summary=[
-            {"name": "list_products", "rps": 480.5, "p50": 50.0, "p95": 120.0,
-             "p99": 200.0, "error_rate": 0.001},
+            {
+                "name": "list_products",
+                "rps": 480.5,
+                "p50": 50.0,
+                "p95": 120.0,
+                "p99": 200.0,
+                "error_rate": 0.001,
+            },
         ],
         trend_svg=_line_chart_svg(
             "吞吐趋势",

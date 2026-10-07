@@ -119,9 +119,7 @@ def _render_template(plan: TestPlan) -> str:
         for i in plan.target_interfaces
         if i.depends_on is None and ("login" in i.path.lower() or "login" in i.name.lower())
     ]
-    task_interfaces = [
-        i for i in plan.target_interfaces if i not in login_interfaces
-    ]
+    task_interfaces = [i for i in plan.target_interfaces if i not in login_interfaces]
 
     shape_name, shape_steps = _shape_for(plan)
 
@@ -210,13 +208,37 @@ def dry_run(plan: TestPlan, target_url: str, directory: str | Path) -> dict:
     import sys
 
     # 用简化方案（无 shape）生成脚本，保证 -t 3s 生效
-    simple = plan.model_copy(update={"load_model": plan.load_model.model_copy(update={
-        "start_users": 1, "max_users": 1, "step_users": 1, "step_duration_seconds": 1,
-    })})
+    simple = plan.model_copy(
+        update={
+            "load_model": plan.load_model.model_copy(
+                update={
+                    "start_users": 1,
+                    "max_users": 1,
+                    "step_users": 1,
+                    "step_duration_seconds": 1,
+                }
+            )
+        }
+    )
     path = write_locustfile(simple, directory)
 
-    cmd = [sys.executable, "-m", "locust", "-f", str(path), "--headless", "--host",
-           target_url, "-u", "1", "-r", "1", "-t", "3s", "--only-summary"]
+    cmd = [
+        sys.executable,
+        "-m",
+        "locust",
+        "-f",
+        str(path),
+        "--headless",
+        "--host",
+        target_url,
+        "-u",
+        "1",
+        "-r",
+        "1",
+        "-t",
+        "3s",
+        "--only-summary",
+    ]
     try:
         proc = subprocess.run(
             cmd,

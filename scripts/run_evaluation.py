@@ -92,13 +92,22 @@ def _run_pressure(fault: str) -> tuple[list, dict]:
             "target_interfaces": [
                 {
                     # 用中性接口名，避免接口名本身含故障关键词污染评测判定
-                    "name": "endpoint", "method": method, "path": endpoint,
-                    "params": params, "weight": 1, "depends_on": None, "assert_status": 200,
+                    "name": "endpoint",
+                    "method": method,
+                    "path": endpoint,
+                    "params": params,
+                    "weight": 1,
+                    "depends_on": None,
+                    "assert_status": 200,
                 }
             ],
             "load_model": {
-                "start_users": 1, "step_users": 3, "step_duration_seconds": 3,
-                "max_users": 12, "spawn_rate": 2, "think_time_seconds": 0.0,
+                "start_users": 1,
+                "step_users": 3,
+                "step_duration_seconds": 3,
+                "max_users": 12,
+                "spawn_rate": 2,
+                "think_time_seconds": 0.0,
             },
             "sla": {"p95_ms": 5000, "max_error_rate": 0.5},
         }
@@ -110,8 +119,13 @@ def _run_pressure(fault: str) -> tuple[list, dict]:
     monitor = HostMonitor(interval=0.5)
     monitor.start()
     csv_dir = tempfile.mkdtemp(prefix=f"eval_{fault}_")
-    Runner(plan=plan, target_url=TARGET_URL, csv_dir=csv_dir,
-           sla_error_rate_break=0.9, timeout_seconds=180).run()
+    Runner(
+        plan=plan,
+        target_url=TARGET_URL,
+        csv_dir=csv_dir,
+        sla_error_rate_break=0.9,
+        timeout_seconds=180,
+    ).run()
     monitor.stop()
 
     points = collect_from_run(task_id, csv_dir, monitor.samples)
@@ -236,10 +250,13 @@ def main() -> int:
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print("\n=== 评测结果 ===")
-    print(json.dumps(
-        {k: v for k, v in summary.items() if k != "results"},
-        ensure_ascii=False, indent=2,
-    ))
+    print(
+        json.dumps(
+            {k: v for k, v in summary.items() if k != "results"},
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     return 0
 
 

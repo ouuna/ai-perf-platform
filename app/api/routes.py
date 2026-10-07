@@ -121,20 +121,29 @@ def _run_task(task_id: int, target_url: str) -> None:
             p95 = sum(float(r["p95_ms"] or 0) for r in subset) / len(subset)
             p99 = sum(float(r["p99_ms"] or 0) for r in subset) / len(subset)
             err = sum(float(r["error_rate"] or 0) for r in subset) / len(subset)
-            metric_summary.append({
-                "name": "整体" if name == "Aggregated" else name,
-                "rps": rps, "p50": p50, "p95": p95, "p99": p99, "error_rate": err,
-            })
+            metric_summary.append(
+                {
+                    "name": "整体" if name == "Aggregated" else name,
+                    "rps": rps,
+                    "p50": p50,
+                    "p95": p95,
+                    "p99": p99,
+                    "error_rate": err,
+                }
+            )
 
-        agg_rows = sorted(
-            [r for r in rows if r["interface"] is None], key=lambda r: float(r["ts"])
-        )
+        agg_rows = sorted([r for r in rows if r["interface"] is None], key=lambda r: float(r["ts"]))
         rps_series = [
-            {"name": "RPS", "points": [(float(r["ts"]), float(r["rps"] or 0)) for r in agg_rows],
-             "color": "#378ADD"},
-            {"name": "P95 (ms)",
-             "points": [(float(r["ts"]), float(r["p95_ms"] or 0)) for r in agg_rows],
-             "color": "#D85A30"},
+            {
+                "name": "RPS",
+                "points": [(float(r["ts"]), float(r["rps"] or 0)) for r in agg_rows],
+                "color": "#378ADD",
+            },
+            {
+                "name": "P95 (ms)",
+                "points": [(float(r["ts"]), float(r["p95_ms"] or 0)) for r in agg_rows],
+                "color": "#D85A30",
+            },
         ]
         trend_svg = _line_chart_svg("吞吐与 P95 延迟趋势", rps_series)
 

@@ -44,18 +44,45 @@ _VALID_PLAN = json.dumps(
     {
         "test_type": "load",
         "target_interfaces": [
-            {"name": "login", "method": "POST", "path": "/login",
-             "params": {"username": "demo"}, "weight": 1, "depends_on": None,
-             "assert_status": 200},
-            {"name": "list_products", "method": "GET", "path": "/products",
-             "params": {}, "weight": 3, "depends_on": "login", "assert_status": 200},
-            {"name": "product_detail", "method": "GET", "path": "/products/1",
-             "params": {}, "weight": 2, "depends_on": "login", "assert_status": 200},
+            {
+                "name": "login",
+                "method": "POST",
+                "path": "/login",
+                "params": {"username": "demo"},
+                "weight": 1,
+                "depends_on": None,
+                "assert_status": 200,
+            },
+            {
+                "name": "list_products",
+                "method": "GET",
+                "path": "/products",
+                "params": {},
+                "weight": 3,
+                "depends_on": "login",
+                "assert_status": 200,
+            },
+            {
+                "name": "product_detail",
+                "method": "GET",
+                "path": "/products/1",
+                "params": {},
+                "weight": 2,
+                "depends_on": "login",
+                "assert_status": 200,
+            },
         ],
-        "load_model": {"start_users": 1, "step_users": 2, "step_duration_seconds": 3,
-                       "max_users": 5, "spawn_rate": 1, "think_time_seconds": 0.1},
+        "load_model": {
+            "start_users": 1,
+            "step_users": 2,
+            "step_duration_seconds": 3,
+            "max_users": 5,
+            "spawn_rate": 1,
+            "think_time_seconds": 0.1,
+        },
         "sla": {"p95_ms": 1000, "p99_ms": 2000, "max_error_rate": 0.05, "min_rps": None},
-        "preconditions": [], "notes": "端到端 demo",
+        "preconditions": [],
+        "notes": "端到端 demo",
     }
 )
 
@@ -75,8 +102,13 @@ def main() -> int:
     monitor = HostMonitor(interval=0.5)
     monitor.start()
     csv_dir = tempfile.mkdtemp(prefix="demo_")
-    runner = Runner(plan=plan, target_url=TARGET_URL, csv_dir=csv_dir,
-                    sla_error_rate_break=0.5, timeout_seconds=120)
+    runner = Runner(
+        plan=plan,
+        target_url=TARGET_URL,
+        csv_dir=csv_dir,
+        sla_error_rate_break=0.5,
+        timeout_seconds=120,
+    )
     result = runner.run()
     monitor.stop()
     print(f"   returncode: {result.returncode}, 时长: {result.duration_seconds:.1f}s")
@@ -121,10 +153,16 @@ def main() -> int:
         p95 = sum(float(r["p95_ms"] or 0) for r in subset) / len(subset)
         p99 = sum(float(r["p99_ms"] or 0) for r in subset) / len(subset)
         err = sum(float(r["error_rate"] or 0) for r in subset) / len(subset)
-        metric_summary.append({
-            "name": "整体" if name == "Aggregated" else name,
-            "rps": rps, "p50": p50, "p95": p95, "p99": p99, "error_rate": err,
-        })
+        metric_summary.append(
+            {
+                "name": "整体" if name == "Aggregated" else name,
+                "rps": rps,
+                "p50": p50,
+                "p95": p95,
+                "p99": p99,
+                "error_rate": err,
+            }
+        )
 
     # 趋势图：用聚合行
     agg_rows = [r for r in rows if r["interface"] is None]

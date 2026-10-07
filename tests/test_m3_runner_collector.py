@@ -19,22 +19,92 @@ def _write_stats_history(tmp_path: Path) -> Path:
     """写一个模拟的 stats_history CSV。"""
     path = tmp_path / "stats_stats_history.csv"
     header = [
-        "Timestamp", "User Count", "Type", "Name", "Request Count", "Failure Count",
-        "Median Response Time", "Average Response Time", "Min Response Time",
-        "Max Response Time", "Average Content Size", "Requests/s", "Failures/s",
-        "50%", "66%", "75%", "80%", "90%", "95%", "98%", "99%", "99.9%", "99.99%", "100%",
+        "Timestamp",
+        "User Count",
+        "Type",
+        "Name",
+        "Request Count",
+        "Failure Count",
+        "Median Response Time",
+        "Average Response Time",
+        "Min Response Time",
+        "Max Response Time",
+        "Average Content Size",
+        "Requests/s",
+        "Failures/s",
+        "50%",
+        "66%",
+        "75%",
+        "80%",
+        "90%",
+        "95%",
+        "98%",
+        "99%",
+        "99.9%",
+        "99.99%",
+        "100%",
     ]
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(header)
         # 2 秒，每接口 1 秒一行 + Aggregated
         for ts in (1.0, 2.0):
-            w.writerow([ts, 10, "GET", "list_products", 100, 2, "50", "55", "10",
-                        "200", "100", "50", "1", "50", "52", "55", "58", "60", "70", "80",
-                        "90", "95", "99", "200"])
-            w.writerow([ts, 10, "", "Aggregated", 200, 4, "55", "60", "10", "300",
-                        "120", "100", "2", "55", "58", "60", "65", "70", "80", "90",
-                        "100", "105", "110", "300"])
+            w.writerow(
+                [
+                    ts,
+                    10,
+                    "GET",
+                    "list_products",
+                    100,
+                    2,
+                    "50",
+                    "55",
+                    "10",
+                    "200",
+                    "100",
+                    "50",
+                    "1",
+                    "50",
+                    "52",
+                    "55",
+                    "58",
+                    "60",
+                    "70",
+                    "80",
+                    "90",
+                    "95",
+                    "99",
+                    "200",
+                ]
+            )
+            w.writerow(
+                [
+                    ts,
+                    10,
+                    "",
+                    "Aggregated",
+                    200,
+                    4,
+                    "55",
+                    "60",
+                    "10",
+                    "300",
+                    "120",
+                    "100",
+                    "2",
+                    "55",
+                    "58",
+                    "60",
+                    "65",
+                    "70",
+                    "80",
+                    "90",
+                    "100",
+                    "105",
+                    "110",
+                    "300",
+                ]
+            )
     return path
 
 
@@ -64,8 +134,19 @@ def test_collect_from_run_aligns_resources(tmp_path: Path) -> None:
 
 def test_collect_error_rate_zero_when_no_requests(tmp_path: Path) -> None:
     path = tmp_path / "stats_stats_history.csv"
-    header = ["Timestamp", "User Count", "Type", "Name", "Request Count", "Failure Count",
-              "Requests/s", "Failures/s", "50%", "95%", "99%"]
+    header = [
+        "Timestamp",
+        "User Count",
+        "Type",
+        "Name",
+        "Request Count",
+        "Failure Count",
+        "Requests/s",
+        "Failures/s",
+        "50%",
+        "95%",
+        "99%",
+    ]
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(header)
@@ -101,12 +182,14 @@ def test_runner_build_cmd(tmp_path: Path) -> None:
     plan = TestPlan.model_validate(
         {
             "test_type": "load",
-            "target_interfaces": [
-                {"name": "p", "method": "GET", "path": "/p", "weight": 1}
-            ],
+            "target_interfaces": [{"name": "p", "method": "GET", "path": "/p", "weight": 1}],
             "load_model": {
-                "start_users": 1, "step_users": 1, "step_duration_seconds": 10,
-                "max_users": 10, "spawn_rate": 2, "think_time_seconds": 0.5,
+                "start_users": 1,
+                "step_users": 1,
+                "step_duration_seconds": 10,
+                "max_users": 10,
+                "spawn_rate": 2,
+                "think_time_seconds": 0.5,
             },
             "sla": {},
         }

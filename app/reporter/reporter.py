@@ -58,31 +58,33 @@ def _line_chart_svg(
 
     parts = [f'<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">']
     parts.append(
-        f'<text x="{width/2}" y="16" text-anchor="middle" font-size="14" '
+        f'<text x="{width / 2}" y="16" text-anchor="middle" font-size="14" '
         f'font-weight="bold" fill="#333">{title}</text>'
     )
     # 坐标轴
-    parts.append(f'<line x1="{pad_l}" y1="{pad_t}" x2="{pad_l}" y2="{height-pad_b}" stroke="#999"/>')
     parts.append(
-        f'<line x1="{pad_l}" y1="{height-pad_b}" x2="{width-pad_r}" '
-        f'y2="{height-pad_b}" stroke="#999"/>'
+        f'<line x1="{pad_l}" y1="{pad_t}" x2="{pad_l}" y2="{height - pad_b}" stroke="#999"/>'
+    )
+    parts.append(
+        f'<line x1="{pad_l}" y1="{height - pad_b}" x2="{width - pad_r}" '
+        f'y2="{height - pad_b}" stroke="#999"/>'
     )
     # Y 轴刻度（min/max）
     parts.append(
-        f'<text x="{pad_l-8}" y="{sy(max_y)}" text-anchor="end" font-size="10" fill="#666">'
+        f'<text x="{pad_l - 8}" y="{sy(max_y)}" text-anchor="end" font-size="10" fill="#666">'
         f"{max_y:.1f}</text>"
     )
     parts.append(
-        f'<text x="{pad_l-8}" y="{sy(min_y)}" text-anchor="end" font-size="10" fill="#666">'
+        f'<text x="{pad_l - 8}" y="{sy(min_y)}" text-anchor="end" font-size="10" fill="#666">'
         f"{min_y:.1f}</text>"
     )
     # X 轴刻度
     parts.append(
-        f'<text x="{sx(min_x)}" y="{height-pad_b+16}" text-anchor="middle" '
+        f'<text x="{sx(min_x)}" y="{height - pad_b + 16}" text-anchor="middle" '
         f'font-size="10" fill="#666">{min_x:.0f}</text>'
     )
     parts.append(
-        f'<text x="{sx(max_x)}" y="{height-pad_b+16}" text-anchor="middle" '
+        f'<text x="{sx(max_x)}" y="{height - pad_b + 16}" text-anchor="middle" '
         f'font-size="10" fill="#666">{max_x:.0f}</text>'
     )
 
@@ -93,12 +95,10 @@ def _line_chart_svg(
             continue
         color = s.get("color", "#378ADD")
         path = "M " + " L ".join(f"{sx(p[0]):.1f} {sy(p[1]):.1f}" for p in pts)
-        parts.append(
-            f'<path d="{path}" fill="none" stroke="{color}" stroke-width="2"/>'
-        )
+        parts.append(f'<path d="{path}" fill="none" stroke="{color}" stroke-width="2"/>')
         # 图例
         parts.append(
-            f'<text x="{width-pad_r-10}" y="{16 + 14*series.index(s)}" '
+            f'<text x="{width - pad_r - 10}" y="{16 + 14 * series.index(s)}" '
             f'text-anchor="end" font-size="10" fill="{color}">{s["name"]}</text>'
         )
 

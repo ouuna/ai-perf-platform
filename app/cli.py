@@ -27,9 +27,9 @@ def version() -> None:
 @app.command()
 def plan(
     requirement: Annotated[str, typer.Argument(help="自然语言测试需求")],
-    output: Annotated[
-        Path, typer.Option("--output", "-o", help="方案输出 JSON 路径")
-    ] = Path("plan.json"),
+    output: Annotated[Path, typer.Option("--output", "-o", help="方案输出 JSON 路径")] = Path(
+        "plan.json"
+    ),
     provider: Annotated[
         str, typer.Option("--provider", help="LLM provider (mock/anthropic/openai)")
     ] = "mock",
@@ -45,12 +45,10 @@ def plan(
 @app.command()
 def run(
     plan_file: Annotated[Path, typer.Argument(help="方案 JSON 文件路径")],
-    target_url: Annotated[
-        str, typer.Option("--target", help="目标地址")
-    ] = "http://127.0.0.1:8001",
-    output_dir: Annotated[
-        Path, typer.Option("--output", "-o", help="报告输出目录")
-    ] = Path("examples/reports"),
+    target_url: Annotated[str, typer.Option("--target", help="目标地址")] = "http://127.0.0.1:8001",
+    output_dir: Annotated[Path, typer.Option("--output", "-o", help="报告输出目录")] = Path(
+        "examples/reports"
+    ),
 ) -> None:
     """执行压测 + 分析 + 生成报告（同步）。"""
     from app.analyzer.ai import AIAnalyzer
@@ -98,18 +96,29 @@ def run(
         p99 = sum(float(r["p99_ms"] or 0) for r in subset) / len(subset)
         p50 = sum(float(r["p50_ms"] or 0) for r in subset) / len(subset)
         err = sum(float(r["error_rate"] or 0) for r in subset) / len(subset)
-        metric_summary.append({
-            "name": "整体" if name == "Aggregated" else name,
-            "rps": rps, "p50": p50, "p95": p95, "p99": p99, "error_rate": err,
-        })
+        metric_summary.append(
+            {
+                "name": "整体" if name == "Aggregated" else name,
+                "rps": rps,
+                "p50": p50,
+                "p95": p95,
+                "p99": p99,
+                "error_rate": err,
+            }
+        )
 
     agg_rows = sorted([r for r in rows if r["interface"] is None], key=lambda r: float(r["ts"]))
     rps_series = [
-        {"name": "RPS", "points": [(float(r["ts"]), float(r["rps"] or 0)) for r in agg_rows],
-         "color": "#378ADD"},
-        {"name": "P95 (ms)",
-         "points": [(float(r["ts"]), float(r["p95_ms"] or 0)) for r in agg_rows],
-         "color": "#D85A30"},
+        {
+            "name": "RPS",
+            "points": [(float(r["ts"]), float(r["rps"] or 0)) for r in agg_rows],
+            "color": "#378ADD",
+        },
+        {
+            "name": "P95 (ms)",
+            "points": [(float(r["ts"]), float(r["p95_ms"] or 0)) for r in agg_rows],
+            "color": "#D85A30",
+        },
     ]
     trend_svg = _line_chart_svg("吞吐与 P95 延迟趋势", rps_series)
     host_note = (

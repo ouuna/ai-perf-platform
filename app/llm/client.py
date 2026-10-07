@@ -118,9 +118,7 @@ class AnthropicClient(LLMClient):
             )
         except Exception as exc:  # noqa: BLE001
             raise LLMError(f"Anthropic 调用失败: {exc}") from exc
-        text = "".join(
-            block.text for block in resp.content if getattr(block, "type", "") == "text"
-        )
+        text = "".join(block.text for block in resp.content if getattr(block, "type", "") == "text")
         return LLMResult(text=text, model=self._model, raw=resp)
 
 

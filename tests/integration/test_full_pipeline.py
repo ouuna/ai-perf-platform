@@ -36,16 +36,36 @@ def _valid_plan_json() -> str:
         {
             "test_type": "load",
             "target_interfaces": [
-                {"name": "login", "method": "POST", "path": "/login",
-                 "params": {"username": "tester"}, "weight": 1, "depends_on": None,
-                 "assert_status": 200},
-                {"name": "list_products", "method": "GET", "path": "/products",
-                 "params": {}, "weight": 3, "depends_on": "login", "assert_status": 200},
+                {
+                    "name": "login",
+                    "method": "POST",
+                    "path": "/login",
+                    "params": {"username": "tester"},
+                    "weight": 1,
+                    "depends_on": None,
+                    "assert_status": 200,
+                },
+                {
+                    "name": "list_products",
+                    "method": "GET",
+                    "path": "/products",
+                    "params": {},
+                    "weight": 3,
+                    "depends_on": "login",
+                    "assert_status": 200,
+                },
             ],
-            "load_model": {"start_users": 1, "step_users": 2, "step_duration_seconds": 2,
-                           "max_users": 3, "spawn_rate": 1, "think_time_seconds": 0.1},
+            "load_model": {
+                "start_users": 1,
+                "step_users": 2,
+                "step_duration_seconds": 2,
+                "max_users": 3,
+                "spawn_rate": 1,
+                "think_time_seconds": 0.1,
+            },
             "sla": {"p95_ms": 5000, "p99_ms": 10000, "max_error_rate": 0.5, "min_rps": None},
-            "preconditions": [], "notes": "",
+            "preconditions": [],
+            "notes": "",
         }
     )
 
@@ -65,8 +85,13 @@ def test_full_pipeline_mock(tmp_path: Path) -> None:
     monitor = HostMonitor(interval=0.5)
     monitor.start()
 
-    runner = Runner(plan=plan, target_url=TARGET_URL, csv_dir=tmp_path,
-                    sla_error_rate_break=0.9, timeout_seconds=60)
+    runner = Runner(
+        plan=plan,
+        target_url=TARGET_URL,
+        csv_dir=tmp_path,
+        sla_error_rate_break=0.9,
+        timeout_seconds=60,
+    )
     result = runner.run()
     monitor.stop()
 

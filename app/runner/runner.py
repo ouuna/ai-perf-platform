@@ -51,13 +51,20 @@ class Runner:
     def _build_cmd(self, locustfile: Path) -> list[str]:
         lm = self.plan.load_model
         return [
-            sys.executable, "-m", "locust",
-            "-f", str(locustfile),
+            sys.executable,
+            "-m",
+            "locust",
+            "-f",
+            str(locustfile),
             "--headless",
-            "--host", self.target_url,
-            "-u", str(lm.max_users),
-            "-r", str(lm.spawn_rate),
-            "--csv", str(Path(self.csv_dir) / "stats"),
+            "--host",
+            self.target_url,
+            "-u",
+            str(lm.max_users),
+            "-r",
+            str(lm.spawn_rate),
+            "--csv",
+            str(Path(self.csv_dir) / "stats"),
             "--csv-full-history",
         ]
 

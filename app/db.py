@@ -160,9 +160,7 @@ class Database:
         )
 
     def get_metric_points(self, task_id: int) -> list[sqlite3.Row]:
-        return self.query(
-            "SELECT * FROM metric_points WHERE task_id=? ORDER BY ts ASC", (task_id,)
-        )
+        return self.query("SELECT * FROM metric_points WHERE task_id=? ORDER BY ts ASC", (task_id,))
 
     # ---- reports ----
 
