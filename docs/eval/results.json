@@ -1,0 +1,101 @@
+{
+  "total": 6,
+  "direction_accuracy": 0.6666666666666666,
+  "precise_accuracy": 0.16666666666666666,
+  "ai_accuracy": 0.0,
+  "results": {
+    "slow_query": {
+      "direction": "延迟",
+      "rule_facts": [
+        "检测到吞吐拐点：并发超过该点后吞吐不再增长、延迟上升",
+        "接口 'Aggregated' SLA 判定：通过",
+        "接口 'endpoint' SLA 判定：通过",
+        "延迟随时间持续上涨，疑似资源泄漏或请求积压",
+        "吞吐出现明显锯齿波动，可能存在锁竞争或间歇性阻塞"
+      ],
+      "ai_hypotheses": [
+        "规则层识别到性能问题（见 F1），需进一步定位具体原因"
+      ],
+      "direction_hit": true,
+      "precise_hit": false,
+      "ai_hit": false
+    },
+    "n_plus_1": {
+      "direction": "延迟",
+      "rule_facts": [
+        "检测到吞吐拐点：并发超过该点后吞吐不再增长、延迟上升",
+        "接口 'Aggregated' SLA 判定：通过",
+        "接口 'endpoint' SLA 判定：通过",
+        "吞吐出现明显锯齿波动，可能存在锁竞争或间歇性阻塞"
+      ],
+      "ai_hypotheses": [
+        "规则层识别到性能问题（见 F1），需进一步定位具体原因"
+      ],
+      "direction_hit": true,
+      "precise_hit": false,
+      "ai_hit": false
+    },
+    "lock_contention": {
+      "direction": "吞吐",
+      "rule_facts": [
+        "检测到吞吐拐点：并发超过该点后吞吐不再增长、延迟上升",
+        "接口 'Aggregated' SLA 判定：通过",
+        "接口 'endpoint' SLA 判定：通过",
+        "延迟随时间持续上涨，疑似资源泄漏或请求积压",
+        "吞吐出现明显锯齿波动，可能存在锁竞争或间歇性阻塞"
+      ],
+      "ai_hypotheses": [
+        "规则层识别到性能问题（见 F1），需进一步定位具体原因"
+      ],
+      "direction_hit": true,
+      "precise_hit": true,
+      "ai_hit": false
+    },
+    "pool_exhaustion": {
+      "direction": "延迟",
+      "rule_facts": [
+        "检测到吞吐拐点：并发超过该点后吞吐不再增长、延迟上升",
+        "接口 'Aggregated' SLA 判定：通过",
+        "接口 'endpoint' SLA 判定：通过",
+        "延迟随时间持续上涨，疑似资源泄漏或请求积压",
+        "吞吐出现明显锯齿波动，可能存在锁竞争或间歇性阻塞"
+      ],
+      "ai_hypotheses": [
+        "规则层识别到性能问题（见 F1），需进一步定位具体原因"
+      ],
+      "direction_hit": true,
+      "precise_hit": false,
+      "ai_hit": false
+    },
+    "memory_leak": {
+      "direction": "内存",
+      "rule_facts": [
+        "检测到吞吐拐点：并发超过该点后吞吐不再增长、延迟上升",
+        "接口 'Aggregated' SLA 判定：通过",
+        "接口 'endpoint' SLA 判定：通过",
+        "吞吐出现明显锯齿波动，可能存在锁竞争或间歇性阻塞"
+      ],
+      "ai_hypotheses": [
+        "规则层识别到性能问题（见 F1），需进一步定位具体原因"
+      ],
+      "direction_hit": false,
+      "precise_hit": false,
+      "ai_hit": false
+    },
+    "cpu_bound": {
+      "direction": "cpu",
+      "rule_facts": [
+        "检测到吞吐拐点：并发超过该点后吞吐不再增长、延迟上升",
+        "接口 'Aggregated' SLA 判定：通过",
+        "接口 'endpoint' SLA 判定：通过",
+        "吞吐出现明显锯齿波动，可能存在锁竞争或间歇性阻塞"
+      ],
+      "ai_hypotheses": [
+        "规则层识别到性能问题（见 F1），需进一步定位具体原因"
+      ],
+      "direction_hit": false,
+      "precise_hit": false,
+      "ai_hit": false
+    }
+  }
+}

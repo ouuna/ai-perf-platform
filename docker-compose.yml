@@ -1,0 +1,24 @@
+services:
+  platform:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - AP_LLM_PROVIDER=mock
+      - AP_DB_PATH=/app/data/platform.db
+    volumes:
+      - platform_data:/app/data
+    depends_on:
+      - target
+
+  target:
+    build: .
+    command: ["uvicorn", "demo_target.app:app", "--host", "0.0.0.0", "--port", "8001"]
+    ports:
+      - "8001:8001"
+    environment:
+      # 通过环境变量初始启用故障（可选），默认全关
+      - AP_FAULTS=
+
+volumes:
+  platform_data:
